@@ -1,10 +1,10 @@
-class day1advent:
-    def __init__(self, input_file) -> None:
-        self.input_file = input_file
+class TestDay1Advent:
+    # def __init__(self, input_file) -> None:
+    #     self.input_file = input_file
 
-    def day1_part1(self):
-        print('reading file: ' + self.input_file)
-        with open(self.input_file, 'r') as file:
+    def day1_part1(self, input_file):
+        print('reading file: ' + input_file)
+        with open(input_file, 'r') as file:
             biggest_value = 0
             current_value = 0
             for line in file:
@@ -16,12 +16,13 @@ class day1advent:
                     current_value = 0
             print('the most calories a single reindeer has is: ')
             print(biggest_value)
+            return biggest_value
 
 
 
-    def day1_part2(self):
-       print('reading file: ' + self.input_file)
-       with open(self.input_file, 'r') as file:
+    def day1_part2(self, input_file):
+       print('reading file: ' + input_file)
+       with open(input_file, 'r') as file:
             biggest_values = [0, 0, 0]
             biggest_value = 0
             current_value = 0
@@ -41,8 +42,15 @@ class day1advent:
                 biggest_value += biggest_values[i]
             print('the total calories the top three reindeer have together is: ')
             print(biggest_value)
+            return biggest_value
+
+    def test_day1_part1(self):
+        assert (self.day1_part1('/Users/sophieborchart/advent_of_code/day1input.txt')) == 69626
+    
+    def test_day1_part2(self):
+        assert (self.day1_part2('/Users/sophieborchart/advent_of_code/day1input.txt')) == 206780
 
 
-obj = day1advent('/Users/sophieborchart/Desktop/day1input.txt')
-obj.day1_part1()
-obj.day1_part2()
+obj = TestDay1Advent()
+obj.day1_part1('/Users/sophieborchart/advent_of_code/day1input.txt')
+obj.day1_part2('/Users/sophieborchart/advent_of_code/day1input.txt')
