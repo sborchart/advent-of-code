@@ -51,7 +51,7 @@ class TestDay5Advent:
     # def day5_part2(self, input_file):
 
     def test_day5_part1(self):
-        assert (self.day4_part1('/Users/sophieborchart/advent_of_code/day5input.txt')) == "MQTPGLLDN"
+        assert (self.day5_part1('/Users/sophieborchart/advent_of_code/day5input.txt')) == "MQTPGLLDN"
     
     # def test_day5_part2(self):
     #     assert (self.day4_part2('/Users/sophieborchart/advent_of_code/day5input.txt')) == 801
