@@ -5,7 +5,7 @@ import os
 puzzle_input = '/Users/sophieborchart/advent_of_code/day7input.txt'
 
 class Day7:
-    def day7_part1(self):
+    def day7(self):
         with open(puzzle_input, 'r') as f:
             lines = f.readlines()
             # make an array of each line without whitespaces
@@ -40,8 +40,18 @@ class Day7:
 
         # now that the tree has been traversed and we have our info, we can calculate the size of the total of all dirs <= 10,00
         all_dirs_size = tree.root.find_dirs_part_1()
-        # print(all_dirs_size)
-        tree.root.find_dir_to_delete_part_2()
+        print("part 1: the sum of the total sizes of these directories is: ")
+        print(all_dirs_size)
+
+        # part 2 is also done after the tree has been created
+        total_space_on_disk = 70000000
+        space_needed_for_disk = 30000000
+        current_empty_space = total_space_on_disk - tree.root.get_size()
+        empty_space_needed = space_needed_for_disk - current_empty_space
+        potential_dirs = tree.root.find_dir_to_delete_part_2(empty_space_needed)
+        potential_dirs.sort()
+        print("part 2: the directory we need to delete is: ")
+        print(potential_dirs[0])
 
 
 
@@ -91,35 +101,20 @@ class TreeNode:
                     dir_sizes += child.find_dirs_part_1()
         return dir_sizes
 
-    def find_dir_to_delete_part_2(self):
-        ## NOT TOTALLY WORKING YET!!!
-
-        # find the total amount of used space = outermost dir
-        # we need total of 30000 unused space
-        # find unused space = 70000000 - outmost dir
-        # if dir > unused space save to list = potential_dirs
-        # choose smallest dir out of potential_dirs
-        # get size of that dir and return it
-        unused_space = 0
-        used_space = 0
-        potential_dirs = []
-        for child in self.children:
-            if child.name == "root_dir":
-                used_space = child.size
-                unused_space = 70000000 - used_space
-                print("unused space is: ")
-                print(unused_space)
-                print("used space is: ")
-                print(used_space)
-        if unused_space < 30000:
+    # this will return a list of the potential dirs with available size needed that when combined with availble
+    # free space, we will free up space to 30,000
+    def find_dir_to_delete_part_2(self, minimum_size):
+        potential_dir_sizes = []
+        if self.is_dir:
             for child in self.children:
-                if child.is_dir and child.get_size() > unused_space:
-                    potential_dirs.append(child.get_size())
-        potential_dirs.sort()
-        print("the directory we need to delete is:", potential_dirs[0])
-        size_of_dir_to_delete = potential_dirs[0]
-        print(size_of_dir_to_delete)
-        return size_of_dir_to_delete
+                # recursively checks if dir is greater than the needed size (30,000 - available space)
+                # adds these potential dirs to list to be returned and processed after tree is parsed
+                if child.is_dir and child.get_size() >= minimum_size:
+                    potential_dir_sizes += [child.get_size()] + child.find_dir_to_delete_part_2(minimum_size)
+                # if the dir is too big, keeps recursively looking through all of it's children dirs
+                else:
+                    potential_dir_sizes += child.find_dir_to_delete_part_2(minimum_size)
+        return potential_dir_sizes
 
 
 
@@ -129,4 +124,4 @@ class TreeNode:
 
 # run the code 
 obj = Day7()
-obj.day7_part1()
+obj.day7()
