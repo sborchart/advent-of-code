@@ -72,6 +72,7 @@ class TreeNode:
         self.name = name
         self.size = file_size
         self.children = []
+        self.parent = None
 
     # get size: if size is directory, it will traverse all children's sizes. otherwise, it is a file and will return the file's size
     def get_size(self):
