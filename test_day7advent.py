@@ -122,6 +122,9 @@ class TreeNode:
     def test_day7_part1(self):
         assert (self.day7_part1('/Users/sophieborchart/advent_of_code/day7input.txt')) == "1315285"
 
+    def test_day7_part2(self):
+        assert (self.day7_part2('/Users/sophieborchart/advent_of_code/day7input.txt')) == "9847279"
+
 
 # run the code 
 obj = Day7()
