@@ -9,6 +9,8 @@ class TestDay8Advent:
             lines = [entry.strip() for entry in lines]
             return lines
 
+    # PART 1
+
     def part_1(self, tree_columns, tree_rows, i, j, num_visible_trees):
         # makes a list of four arrays that contain the differences for the up/down/left/right trees
         trees_to_consider = [tree_rows[:j], tree_rows[j + 1:], tree_columns[:i], tree_columns[i + 1:]]
@@ -17,32 +19,31 @@ class TestDay8Advent:
             num_visible_trees += 1
         return num_visible_trees
 
-    # PART 1
-    def day8_part1(self):
-        lines = self.open_file()
-        # create an array of 0's with rows len(lines) and columns len(lines[0])
-        trees = np.zeros((len(lines), len(lines[0])))
-        # form a 2D array of the trees (numpy because it uses less memory to store data but can be done regularly)
-        for i, line in enumerate(lines):
-            trees[i, :] = np.array(list(line))
+    # def day8_part1(self):
+    #     lines = self.open_file()
+    #     # create an array of 0's with rows len(lines) and columns len(lines[0])
+    #     trees = np.zeros((len(lines), len(lines[0])))
+    #     # form a 2D array of the trees (numpy because it uses less memory to store data but can be done regularly)
+    #     for i, line in enumerate(lines):
+    #         trees[i, :] = np.array(list(line))
 
-        # calculate the number of trees on the edge since they're always visible
-        # by counting the number of rows minus the first and last to get the inner row values and
-        # add the value of the two columns to eliminate duplicates
-        num_visible_trees = (2 * (len(lines) - 2)) + (2 * len(lines[0]))
+    #     # calculate the number of trees on the edge since they're always visible
+    #     # by counting the number of rows minus the first and last to get the inner row values and
+    #     # add the value of the two columns to eliminate duplicates
+    #     num_visible_trees = (2 * (len(lines) - 2)) + (2 * len(lines[0]))
 
-        # loop through all of the trees in the array (except for the edge trees)
-        for i in range(1, trees.shape[0] - 1):
-            for j in range(1, trees.shape[1] - 1):
-                # trees[:, j] selects all elements in the j-th column of trees,
-                # then it calculates the difference between the values in the j column and the value at (i,j) in the i row
-                tree_columns = trees[:, j] - trees[i, j]
-                tree_rows = trees[i, :] - trees[i, j]
-                num_visible_trees = self.part_1(tree_columns, tree_rows, i, j, num_visible_trees)
-        # print the answer
-        print("Number of visible trees is: ")
-        print(num_visible_trees)
-        return num_visible_trees
+    #     # loop through all of the trees in the array (except for the edge trees)
+    #     for i in range(1, trees.shape[0] - 1):
+    #         for j in range(1, trees.shape[1] - 1):
+    #             # trees[:, j] selects all elements in the j-th column of trees,
+    #             # then it calculates the difference between the values in the j column and the value at (i,j) in the i row
+    #             tree_columns = trees[:, j] - trees[i, j]
+    #             tree_rows = trees[i, :] - trees[i, j]
+    #             num_visible_trees = self.part_1(tree_columns, tree_rows, i, j, num_visible_trees)
+    #     # print the answer
+    #     print("Number of visible trees is: ")
+    #     print(num_visible_trees)
+    #     return num_visible_trees
 
 
     # PART 2
@@ -65,13 +66,38 @@ class TestDay8Advent:
         scenic_scores[i, j] = np.prod(list(map(self.compute_scenic_score, directions)))
         return scenic_scores[i, j]
 
-    def day8_part2(self):
+    # def day8_part2(self):
+    #     lines = self.open_file()
+    #     # create an array of 0's with rows len(lines) and columns len(lines[0])
+    #     trees = np.zeros((len(lines), len(lines[0])))
+    #     # form a 2D array of the trees (numpy because it uses less memory to store data but can be done regularly)
+    #     for i, line in enumerate(lines):
+    #         trees[i, :] = np.array(list(line))
+    #     # same code to create a 2D array of 0's with rows len(lines) and columns len(lines[0]) for the scenic scores
+    #     # (need to make a new one since the original from part 1 has been modified)
+    #     scenic_scores = np.zeros((len(lines), len(lines[0])))
+    #     # loop through all of the trees in the array (except for the edge trees, since their scenic scores will always be 0)
+    #     for i in range(1, trees.shape[0] - 1):
+    #         for j in range(1, trees.shape[1] - 1):
+    #             tree_columns = trees[:, j] - trees[i, j]
+    #             tree_rows = trees[i, :] - trees[i, j]
+    #             scenic_scores[i, j] = self.part_2(tree_columns, tree_rows, i, j, scenic_scores)
+    #     max_value = int(np.max(scenic_scores))
+    #     print("Highest scenic score possible for any tree: ")
+    #     print(max_value)
+    #     return max_value
+
+    def both_parts(self):
         lines = self.open_file()
         # create an array of 0's with rows len(lines) and columns len(lines[0])
         trees = np.zeros((len(lines), len(lines[0])))
         # form a 2D array of the trees (numpy because it uses less memory to store data but can be done regularly)
         for i, line in enumerate(lines):
             trees[i, :] = np.array(list(line))
+        # calculate the number of trees on the edge since they're always visible
+        # by counting the number of rows minus the first and last to get the inner row values and
+        # add the value of the two columns to eliminate duplicates
+        num_visible_trees = (2 * (len(lines) - 2)) + (2 * len(lines[0]))
         # same code to create a 2D array of 0's with rows len(lines) and columns len(lines[0]) for the scenic scores
         # (need to make a new one since the original from part 1 has been modified)
         scenic_scores = np.zeros((len(lines), len(lines[0])))
@@ -81,10 +107,14 @@ class TestDay8Advent:
                 tree_columns = trees[:, j] - trees[i, j]
                 tree_rows = trees[i, :] - trees[i, j]
                 scenic_scores[i, j] = self.part_2(tree_columns, tree_rows, i, j, scenic_scores)
+                num_visible_trees = self.part_1(tree_columns, tree_rows, i, j, num_visible_trees)
         max_value = int(np.max(scenic_scores))
+        
+        # print the answers
         print("Highest scenic score possible for any tree: ")
         print(max_value)
-        return max_value
+        print("Number of visible trees is: ")
+        print(num_visible_trees)
 
     def test_day8_part1(self):
         assert (self.day8_part1()) == 1782
@@ -94,5 +124,6 @@ class TestDay8Advent:
 
 
 obj = TestDay8Advent()
-obj.day8_part1()
-obj.day8_part2()
+# obj.day8_part1()
+# obj.day8_part2()
+obj.both_parts()
