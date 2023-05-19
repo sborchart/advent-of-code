@@ -34,7 +34,7 @@ public class Day10AdventOfCode {
         // System.out.println("140th cycle val is: " + xValAtCycle.get(138));
         // System.out.println("180th cycle val is: " + xValAtCycle.get(178));
         // System.out.println("220th cycle val is: " + xValAtCycle.get(217));
-        System.out.println("The total sum of the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th cycles is : " + totalSignalStrengthOfSixCycles);
+        System.out.println("Part 1 -- The total sum of the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th cycles is : " + totalSignalStrengthOfSixCycles);
         return totalSignalStrengthOfSixCycles;
     }
 
@@ -42,27 +42,18 @@ public class Day10AdventOfCode {
         for (int i = 0; i < instructions.size(); i++) {
             if (instructions.get(i).equals("addx")) {
                 cycleCounter += 2;
-                // addx - 2 cycles
                 try {
                     int valueToAdd = Integer.parseInt(values.get(i));
                     xVal += valueToAdd;
                     xValAtCycle.add(xVal);
                     xValAtCycle.add(xVal);
                 } catch (NumberFormatException e) {
-                    // no value on this line, it's a noop instruction
                 }
             } else {
                 cycleCounter++;
                 xValAtCycle.add(xVal);
-                // instruction is noop - 1 cycle
             }
         }
-        // System.out.println("total number of cycles is: " + (cycleCounter - 1));
-        // System.out.println("x value is: " + xVal);
-        // System.out.println("cycle counter size is: " + xValAtCycle.size());
-        // for (int j = 0; j < xValAtCycle.size(); j++) {
-        //     System.out.println("x val at cycle " + (j+1) + " is: " + xValAtCycle.get(j));
-        // }
     }
 
     public void readFile() {
@@ -85,17 +76,57 @@ public class Day10AdventOfCode {
         catch (FileNotFoundException e) {
             System.out.println("File can't be found!!!");
         }
-        // for (int i = 0; i < instructions.size(); i++) {
-        //     System.out.println("instruction  on line " + (i + 1) + " is " + instructions.get(i));
-        // }
-        // for (int i = 0; i < values.size(); i++) {
-        //     System.out.println("value on line " + (i + 1) + " is: " + values.get(i));
-        // }
+    }
+
+    public void partTwo() {
+        List<Integer> litPixels = new ArrayList<>();
+        int xRegister = 1;
+        int cycleCount = 0;
+
+        System.out.println("Part 2 -- CRT is producing the following image: ");
+
+        File fileInput = new File(puzzleInput);
+        try {
+            Scanner myReader = new Scanner(fileInput);
+            while (myReader.hasNextLine()) {
+                String line = myReader.nextLine();
+                cycleCount = executeCycles(cycleCount, xRegister, litPixels);
+                if (line.startsWith("addx")) {
+                    cycleCount = executeCycles(cycleCount, xRegister, litPixels);
+                    xRegister += Integer.parseInt(line.split(" ")[1]);
+                }
+            }
+            myReader.close();
+        }
+        catch (FileNotFoundException e) {
+            System.out.println("File can't be found!!!");
+        }
+    }
+
+    public int executeCycles(int cycleCount, int xRegister, List<Integer> litPixels) {
+        cycleCount += 1;
+        if (xRegister <= cycleCount && cycleCount <= xRegister + 2) {
+            litPixels.add(cycleCount - 1);
+        }
+        if (cycleCount == 40) {
+            for (int i = 0; i < 40; i++) {
+                if (litPixels.contains(i)) {
+                    System.out.print("#");
+                } else {
+                    System.out.print(".");
+                }
+            }
+            System.out.println(" ");
+            litPixels.clear();
+            cycleCount = 0;
+        }
+        return cycleCount;
     }
 
     public static void main (String [] args) {
-        Day10AdventOfCode partOne = new Day10AdventOfCode();
-        // put into one method partOne and then push up
-        partOne.partOne();
+        Day10AdventOfCode day10 = new Day10AdventOfCode();
+        day10.partOne();
+        day10.partTwo();
+
     } 
 }
