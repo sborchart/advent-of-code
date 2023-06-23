@@ -49,7 +49,7 @@ public class Day11AdventOfCode {
             int lineCount = 1;
 
             Integer monkeyNum = 0;
-            // List<Integer> startingItemsForMonkey = new ArrayList<>();
+            List<Integer> startingItemsForMonkey = new ArrayList<>();
             int operationNum = 0;
             boolean shouldMultiply = false;
             char operationChar = '+';
@@ -66,25 +66,19 @@ public class Day11AdventOfCode {
                     monkeyNum = Character.getNumericValue(result[1].charAt(0));
                 }
                 
-
-                // everything is working except for starting items.. can't figure out how to clear it without deleting it?
-                // it doesn't make sense why the whole list is emptying..
-                // monkey objects are created correctly, now can do the actual work with them
-                
-                List<Integer> startingItemsForMonkey = new ArrayList<>();
-                // initializing starting items
+                // initializing starting items -- WORRY LEVEL
                 if (result[0].equals("Starting")) {
                     String regexPattern = "\\b\\d+\\b";
                     Pattern pattern = Pattern.compile(regexPattern);
                     Matcher matcher = pattern.matcher(line);
+                    startingItemsForMonkey.clear();
                     while (matcher.find()) {
                         int startingNumberToAdd = Integer.parseInt(matcher.group());
                         startingItemsForMonkey.add(startingNumberToAdd);
-                        System.out.println("STARTING NUM " + startingNumberToAdd);
                     }
                 }
 
-                // initializing operation
+                // initializing operation -- HOW WORRY LEVEL CHANGES AS MONEKY INSPECTS EACH ITEM
                 if (result[0].equals("Operation:")) {
                     Matcher matcher = getNumberFromString(line);
                     if (matcher.find()) {
@@ -113,7 +107,7 @@ public class Day11AdventOfCode {
                     }
                 }
 
-                // initializing boolean scenarios
+                // initializing boolean scenarios -- HOW MONKEY USES WORRY LEVEL TO DECIDE WHERE TO THROW
                 if (result[0].equals("If")) {
                     Matcher matcher = getNumberFromString(line);
                     if (matcher.find()) {
@@ -127,13 +121,12 @@ public class Day11AdventOfCode {
                         }
                     }
                 }
-
-                // for (int i = 0; i < startingItems.size(); i++) {
-                //         System.out.println("ITEMS: " + startingItems.get(i));
-                //     }
+                // After each monkey inspects an item but before it tests your worry level,
+                // your relief that the monkey's inspection didn't damage the item causes your worry level
+                // to be divided by three and rounded down to the nearest integer.
 
                 if ((lineCount % 7) == 0) {
-                    // System.out.println("adding monkey with these values:");
+                    System.out.println("adding monkey with these values:");
                     System.out.println("Monkey " + monkeyNum + ":");
                     System.out.println("Starting items: " + startingItemsForMonkey);
                     System.out.println("Operation: new = old " + operationChar + " " + operationNum);
@@ -142,33 +135,73 @@ public class Day11AdventOfCode {
                     System.out.println("If false: throw to monkey " + monkeyToThrowToFalse);
                     System.out.println();
 
-                    Monkey monkey = new Monkey(monkeyNum, startingItemsForMonkey, operationChar, operationNum, numberDivisibleBy,
+                    List<Integer> newListOfStartingItemsForMonkey = new ArrayList<>(startingItemsForMonkey);
+                    Monkey monkey = new Monkey(monkeyNum, newListOfStartingItemsForMonkey, operationChar, operationNum, numberDivisibleBy,
                         monkeyToThrowToTrue, monkeyToThrowToFalse);
                     monkeys.add(monkey);
                 }
-
-                // // emptying the list for the next monkey's starting items to be added
-                // startingItemsForMonkey.clear();
                 lineCount++;
-                // System.out.println("adding line : " + line);
             }
-
             scanner.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        // return lines;
         return monkeys;
     }
 
     public List<Monkey> getMonkeyList() {
         List<Monkey> monkeys = openFileInitializeMonkeys();
-        System.out.println("THERE ARE THIS MANY MONKEYS: " + monkeys.size());
-        // for(int i = 0; i < monkeys.size(); i++) {
-        //     System.out.println(monkeys.get(i));
-        // }
         return monkeys;
     }
+
+    public void runRounds(List<Monkey> monkeyList) {
+        // iterate through each monkey in the monkey list
+        for (int i = 0; i < monkeyList.size(); i++ ) {
+            // iterate through each item the monkey has
+            Monkey currentMonkey = monkeyList.get(i);
+            System.out.println("MONKEY " + i);
+            int worryLevel = currentMonkey.operationNumber;
+            System.out.println("worry level is: " + worryLevel);
+            for (int j = 0; j < currentMonkey.startingItems.size(); j++) {
+                int currentStartingItem = currentMonkey.startingItems.get(j);
+                // System.out.println("starting item is: " + currentStartingItem);
+
+                // if worryLevel is old/ 0, account for that here!
+                // monkey 2 is having this problem
+
+                int newWorryLevel = 0;
+                if (currentMonkey.operation == '*') {
+                    newWorryLevel = currentStartingItem * worryLevel;
+                    // System.out.println("Operation is *");
+                } else {
+                    // System.out.println("Operation is +");
+                    newWorryLevel = currentStartingItem + worryLevel;
+                }
+                // multiply starting item number by worry level
+                System.out.println("NEW WORRY LEVEL: " + newWorryLevel);
+                // divide by 3 after monkey is bored
+                newWorryLevel = newWorryLevel / 3;
+                System.out.println("NEWEST WORRY LEVEL: " + newWorryLevel);
+
+                // test worry level / divisibility to determine which monkey to throw to
+                int divisibilityTest = currentMonkey.numberDivisibleBy;
+                // System.out.println("DIVISIBILITY TEST: " + divisibilityTest);
+
+                int monkeyToThrowTo = 0;
+                if (newWorryLevel % divisibilityTest == 0) {
+                    // System.out.println("IS DIVISIBLE");
+                    monkeyToThrowTo = currentMonkey.monkeyToThrowToTrue;
+                } else {
+                    // System.out.println("NOT DIVISIBLE");
+                    monkeyToThrowTo = currentMonkey.monkeyToThrowToFalse;
+                }
+                monkeyList.get(monkeyToThrowTo).startingItems.add(newWorryLevel);
+                System.out.println("throwing item with worry level " + newWorryLevel + " to monkey " + monkeyToThrowTo);
+            }
+            System.out.println();
+        }
+    }
+
 
     public Matcher getNumberFromString(String line) {
         // regex pattern to get the number out of the string to divide by
@@ -191,6 +224,7 @@ public class Day11AdventOfCode {
         // monkey.getMonkey();
         // day11Obj.openFile();
         // day11Obj.openFileInitializeMonkeys();
-        day11Obj.getMonkeyList();
+        List<Monkey> monkeys = day11Obj.getMonkeyList();
+        day11Obj.runRounds(monkeys);
     }
 }
