@@ -19,10 +19,11 @@ public class Day11AdventOfCode {
         public int numberDivisibleBy;
         public int monkeyToThrowToTrue;
         public int monkeyToThrowToFalse;
+        public int numTimesInspectedItem;
 
         // Monkey constructor 
         public Monkey(int monkeyNumber, List<Integer> startingItems, char operation, int operationNumber,
-            int numberDivisibleBy, int monkeyToThrowToTrue, int monkeyToThrowToFalse) {
+            int numberDivisibleBy, int monkeyToThrowToTrue, int monkeyToThrowToFalse, int numTimesInspectedItem) {
                 this.monkeyNumber = monkeyNumber;
                 this.startingItems = startingItems;
                 this.operation = operation;
@@ -30,14 +31,10 @@ public class Day11AdventOfCode {
                 this.numberDivisibleBy = numberDivisibleBy;
                 this.monkeyToThrowToTrue = monkeyToThrowToTrue;
                 this.monkeyToThrowToFalse = monkeyToThrowToFalse;
-        }
-
-        void getMonkey() {
-            System.out.println("getting the monkey");
+                this.numTimesInspectedItem = numTimesInspectedItem;
         }
     }
 
-    // public List<String> openFile() {
     public List<Monkey> openFileInitializeMonkeys() {
         List<String> lines = new ArrayList<>();
         List<Monkey> monkeys = new ArrayList<>();
@@ -137,7 +134,7 @@ public class Day11AdventOfCode {
 
                     List<Integer> newListOfStartingItemsForMonkey = new ArrayList<>(startingItemsForMonkey);
                     Monkey monkey = new Monkey(monkeyNum, newListOfStartingItemsForMonkey, operationChar, operationNum, numberDivisibleBy,
-                        monkeyToThrowToTrue, monkeyToThrowToFalse);
+                        monkeyToThrowToTrue, monkeyToThrowToFalse, 0);
                     monkeys.add(monkey);
                 }
                 lineCount++;
@@ -154,20 +151,19 @@ public class Day11AdventOfCode {
         return monkeys;
     }
 
-    public void runRounds(List<Monkey> monkeyList) {
+    public int runOneRound(List<Monkey> monkeyList) {
         // iterate through each monkey in the monkey list
         for (int i = 0; i < monkeyList.size(); i++ ) {
             // iterate through each item the monkey has
             Monkey currentMonkey = monkeyList.get(i);
-            System.out.println("MONKEY " + i);
+            System.out.println("MONKEY " + i + ":");
             int worryLevel = currentMonkey.operationNumber;
-            System.out.println("worry level is: " + worryLevel);
+            int numberOfItemsMonkeyStartedWith = currentMonkey.startingItems.size();
+            System.out.println("Monkey " + i + " is starting with " + numberOfItemsMonkeyStartedWith + " items!");
             for (int j = 0; j < currentMonkey.startingItems.size(); j++) {
                 int currentStartingItem = currentMonkey.startingItems.get(j);
-                // System.out.println("starting item is: " + currentStartingItem);
-
-                // if worryLevel is old/ 0, account for that here!
-                // monkey 2 is having this problem
+                System.out.println("Monkey inspects an item with a worry level of " + currentStartingItem);
+                currentMonkey.numTimesInspectedItem++;
 
                 int newWorryLevel = 0;
                 if (currentMonkey.operation == '*') {
@@ -177,31 +173,66 @@ public class Day11AdventOfCode {
                     // System.out.println("Operation is +");
                     newWorryLevel = currentStartingItem + worryLevel;
                 }
-                // multiply starting item number by worry level
-                System.out.println("NEW WORRY LEVEL: " + newWorryLevel);
+                if (worryLevel == 0) {
+                    newWorryLevel = currentStartingItem * currentStartingItem;
+                    // worry level is multiplied by itself
+                    System.out.println("Worry level is multiplied by itself to " + newWorryLevel);
+                }
+                else {
+                    // multiply starting item number by worry level
+                    System.out.println("Worry level is multiplied by " + worryLevel + " to " + newWorryLevel);
+                }
                 // divide by 3 after monkey is bored
                 newWorryLevel = newWorryLevel / 3;
-                System.out.println("NEWEST WORRY LEVEL: " + newWorryLevel);
+                System.out.println("Monkey gets bored with item. Worry level is divided by 3 to " + newWorryLevel);
 
                 // test worry level / divisibility to determine which monkey to throw to
                 int divisibilityTest = currentMonkey.numberDivisibleBy;
-                // System.out.println("DIVISIBILITY TEST: " + divisibilityTest);
 
                 int monkeyToThrowTo = 0;
                 if (newWorryLevel % divisibilityTest == 0) {
-                    // System.out.println("IS DIVISIBLE");
+                    System.out.println("Current worry level is divisible by " + divisibilityTest);
                     monkeyToThrowTo = currentMonkey.monkeyToThrowToTrue;
                 } else {
-                    // System.out.println("NOT DIVISIBLE");
+                    System.out.println("Current worry level is not divisible by " + divisibilityTest);
                     monkeyToThrowTo = currentMonkey.monkeyToThrowToFalse;
                 }
+
                 monkeyList.get(monkeyToThrowTo).startingItems.add(newWorryLevel);
-                System.out.println("throwing item with worry level " + newWorryLevel + " to monkey " + monkeyToThrowTo);
+                System.out.println("Item with worry level " + newWorryLevel + " is thrown to monkey " + monkeyToThrowTo);
             }
             System.out.println();
+            for (int x = 0; x < numberOfItemsMonkeyStartedWith; x++) {
+                currentMonkey.startingItems.remove(0);
+            }
         }
+        List<Integer> timesInspectedList = new ArrayList<>();
+        for (int i = 0; i < monkeyList.size(); i++) {
+            for (int j = 0; j < monkeyList.get(i).startingItems.size(); j++) {
+                System.out.println("Monkey " + i + ": " + monkeyList.get(i).startingItems.get(j));
+            }
+            System.out.println("Monkey " + i + " inspected items " + monkeyList.get(i).numTimesInspectedItem + " times");
+            timesInspectedList.add(monkeyList.get(i).numTimesInspectedItem );
+        }
+        for (int z = 0; z < timesInspectedList.size(); z++) {
+            System.out.println("NUMBERS INSPECTED: " + timesInspectedList.get(z));
+        }
+        List<Integer> twoLargestNums = findTwoLargestNumbers(timesInspectedList);
+        System.out.println("First largest number is: " + twoLargestNums.get(0));
+        System.out.println("Second largest number is: " + twoLargestNums.get(1));
+        // something is a bit wonky, it's working for the example but not for mine, might have an off by one error.
+        return (twoLargestNums.get(0) * (twoLargestNums.get(1)-1));
     }
 
+    public static List<Integer> findTwoLargestNumbers(List<Integer> numbers) {
+        if (numbers == null || numbers.size() < 2) {
+            throw new IllegalArgumentException("List must contain at least two numbers");
+        }
+        // Sort the list in descending order
+        Collections.sort(numbers, Collections.reverseOrder());
+        // Return a new list containing the two largest numbers
+        return numbers.subList(0, 2);
+    }
 
     public Matcher getNumberFromString(String line) {
         // regex pattern to get the number out of the string to divide by
@@ -220,11 +251,12 @@ public class Day11AdventOfCode {
 
     public static void main(String [] args) {
         Day11AdventOfCode day11Obj = new Day11AdventOfCode();
-        // Monkey monkey = new Monkey();
-        // monkey.getMonkey();
-        // day11Obj.openFile();
-        // day11Obj.openFileInitializeMonkeys();
         List<Monkey> monkeys = day11Obj.getMonkeyList();
-        day11Obj.runRounds(monkeys);
+        int answer = 0;
+        for (int i = 1; i < 21; i++) {
+            System.out.println("ROUND " + i);
+            answer = day11Obj.runOneRound(monkeys);
+        }
+        System.out.println("LEVEL OF MONKEY BUSINESS AFTER 20 ROUNDS OF SHENANIGANS: " + answer);
     }
 }

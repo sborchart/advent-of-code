@@ -106,40 +106,125 @@ public class Day8AdventOfCode {
         if (treeIsVisible) {
             numberOfVisibleTrees++;
         }
-        System.out.println("Number of visible trees is: " + numberOfVisibleTrees);
+        // System.out.println("Number of visible trees is: " + numberOfVisibleTrees);
         return numberOfVisibleTrees;
+    }   
+
+
+    public int day8_part2() {
+        List<String> lines = openFile();
+        int rows = lines.size();
+        int cols = lines.get(0).length();
+        char[][] trees = new char[rows][cols];
+        int[][] scenicScores = new int[rows][cols];
+        
+        // create a 2D char array from the lines
+        for (int i = 0; i < rows; i++) {
+            String line = lines.get(i);
+            for (int j = 0; j < cols; j++) {
+                trees[i][j] = line.charAt(j);
+            }
+        }
+        
+        // loop through all of the trees in the array
+        for (int i = 1; i < rows - 1; i++) {
+            for (int j = 1; j < cols - 1; j++) {
+                int[] treeColumns = new int[rows];
+                int[] treeRows = new int[cols];
+                for (int k = 0; k < rows; k++) {
+                    treeColumns[k] = trees[k][j] - trees[i][j];
+                    // System.out.println(treeColumns[k]);
+                }
+                for (int k = 0; k < cols; k++) {
+                    treeRows[k] = trees[i][k] - trees[i][j];
+                    // System.out.println(treeRows[k]);
+                }
+                // System.out.println(scenicScores[i][j]);
+                // good until here, problem is in part2 method
+                scenicScores[i][j] = part2(treeColumns, treeRows, i, j, scenicScores);
+            }
+        }
+        
+        int maxScore = Arrays.stream(scenicScores)
+                            .flatMapToInt(Arrays::stream)
+                            .max()
+                            .getAsInt();
+        // for (int i = 0; i < rows; i++) {
+        //     for (int j = 0; j < cols; j++) {
+        //         System.out.println(scenicScores[i][j]);
+        //     }
+        // }
+        System.out.println("PART 2 -- Highest scenic score possible for any tree: " + maxScore);
+        return maxScore;
     }
 
-    // public int partTwo(int[] treeColumns, int[] treeRows, int i, int j, int[][] scenicScores) {
-    //     int[][] directions = new int[4][];
-    //     directions[0] = Arrays.copyOfRange(treeRows, j-1, -1); // equivalent to tree_rows[j - 1:: - 1]
-    //     directions[1] = Arrays.copyOfRange(treeRows, j+1, treeRows.length); // equivalent to tree_rows[j + 1:]
-    //     directions[2] = Arrays.copyOfRange(treeColumns, i-1, -1); // equivalent to tree_columns[i - 1:: - 1]
-    //     directions[3] = Arrays.copyOfRange(treeColumns, i+1, treeColumns.length); // equivalent to tree_columns[i + 1:]
+    private int part2(int[] treeColumns, int[] treeRows, int i, int j, int[][] scenicScores) {
+        // start at column j - 1 up to the beginning of the array in iterations of -1 to go from right to left, etc
 
-    //     int product = 1;
-    //     for (int[] direction : directions) {
-    //         product *= computeScenicScore(direction);
+        int[][] directions = {
+            Arrays.copyOfRange(treeRows, 0, j),
+            Arrays.copyOfRange(treeRows, j + 1, treeRows.length),
+            Arrays.copyOfRange(treeColumns, 0, i),
+            Arrays.copyOfRange(treeColumns, i + 1, treeColumns.length)
+        };
+
+        // int[] direction1 = Arrays.copyOfRange(treeRows, j - 1, -1);
+        // int[] direction2 = Arrays.copyOfRange(treeRows, j + 1, treeRows.length);
+        // int[] direction3 = Arrays.copyOfRange(treeColumns, i - 1, -1);
+        // int[] direction4 = Arrays.copyOfRange(treeColumns, i + 1, treeColumns.length);
+        // int[][] directions = {direction1, direction2, direction3, direction4};
+
+        for (int x = 0; x < directions.length; x++) {
+            for (int y = 0; y < directions[x].length; y++) {
+                // System.out.println("DIRECTIONS");
+                System.out.print(directions[x][y]);
+            }
+        }
+    
+        int score = 1;
+        for (int[] direction : directions) {
+            score *= computeScenicScore(direction);
+        }
+        return score;
+    }
+
+    private int computeScenicScore(int[] route) {
+        int len = route.length;
+        int maxLen = 0;
+        for (int i = 0; i < len; i++) {
+            if (route[i] >= 0) {
+                maxLen = i + 1;
+            }
+        }
+        return (maxLen > 0) ? maxLen : len;
+    }
+
+    // public static int computeScenicScore(int[] route) {
+    //     // determine which trees are taller (>=0) by determining the difference to the current tree in the loop
+    //     List<Boolean> tallestTreesArray = new ArrayList<>();
+    //     for (int i = 0; i < route.length; i++) {
+    //         if (route[i] >= 0) {
+    //             tallestTreesArray.add(true);
+    //         } else {
+    //             tallestTreesArray.add(false);
+    //         }
     //     }
-    //     scenicScores[i][j] = product;
-    //     return scenicScores[i][j];
+
+    //     if (tallestTreesArray.contains(true)) {
+    //         // get the first index that is taller or equally as tall,
+    //         // index(True) returns the index of the first element in list with value True
+    //         return tallestTreesArray.indexOf(true) + 1;
+    //     } else {
+    //         // no routes >= 0, so the scenic score is the maximum possible length of the route
+    //         return tallestTreesArray.size();
+    //     }
     // }
 
-    public int computeScenicScore(int [] route) {
-        List<Boolean> tallestTrees = new ArrayList<>();
-        for (int height : route) {
-            tallestTrees.add(height >= 0);
-        }
-        if (tallestTrees.contains(true)) {
-            return (tallestTrees.indexOf(true) + 1);
-        }
-        else {
-            return tallestTrees.size();
-        }
-    }
 
     public static void main(String [] args) {
         Day8AdventOfCode day8Obj = new Day8AdventOfCode();
         day8Obj.bothParts();
+        // day8Obj.partTwoSolo();
+        day8Obj.day8_part2();
     }
 }
